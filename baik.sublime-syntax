@@ -1,0 +1,114 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: BAIK
+file_extensions:
+  - ina
+scope: source.ina
+variables:
+  sql_indicator: \s*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|REPLACE|ALTER)\b
+contexts:
+  main:
+
+    - match: '"'
+      scope: punctuation.definition.string.begin.ina
+      push: double_quoted_string
+
+    - match: '#'
+      scope: punctuation.definition.comment.ina
+      push: line_comment
+
+    - match: '(?i)\b(kalau|jika|maka|lainkalau|lainjika|lainnya|akhirkalau|akhirjika|pilih|sama|akhirpilih|selagi|lakukan|baliklagi|keluarselagi|untuk|ulang|lagi|tamat|balik)\b'
+      scope: keyword.control.ina
+
+    - match: '(?i)\b(untaian)\b'
+      scope: storage.type.ina
+
+    - match: '(?i)\b(fungsi|sub)\b'
+      scope: storage.type.function.ina
+
+    - match: '(?i)\b(DefinisiBenda|BendaBaru)\b'
+      scope: storage.type.class.ina
+
+    - match: (\w+)\s*(?=\()
+      scope: entity.name.function.ina
+      push: function_call_arguments
+
+    - match: '(?i)\b(mysql)_([^\s]+)\b'
+      scope: support.function.string.ina
+
+    - match: '(?i)\b(pakai)_([^\s]+)\b'
+      scope: support.class.string.ina
+
+    - match: '(?i)\b([^\s]+)_(layar|alas|warnahuruf|warnadasar|pilihan)\b'
+      scope: support.function.string.ina
+
+    - match: '(?i)\b(tulis|panjang|akar|hapus|label|pilihan|layar|masuk|waktu|hari|musik|jendela|perintah|tunggu|sinus|sin|absolut|abs|cosinus|cos|faktorial|permutasi|kombinasi|pisah|gabung|rupa_html)\b'
+      scope: support.function.string.ina
+
+    - match: '(?i)\&([a-zA-Z0-9_]+)'
+      scope: support.function.string.ina
+
+    - match: '(?i)\b(global|lokal|kode_luar|lingkup|benda)\b'
+      scope: storage.modifier.ina
+
+    - match: '\b(-)?[0-9.]+\b'
+      scope: constant.numeric.ina
+
+    - match: (\-\-|\+\+)
+      scope: keyword.operator.increment-decrement.ina
+
+    - match: (\-|\+|\*|/|%)
+      scope: keyword.operator.arithmetic.ina
+
+    - match: '&&|\|\|'
+      scope: keyword.operator.logical.ina
+
+    - match: '<<|>>|~|\^|&|\|'
+      scope: keyword.operator.bitwise.ina
+
+    - match: (===|!==|<=>|==|!=|<=|>=|<>|<|>)
+      scope: keyword.operator.comparison.ina
+
+    - match: (?i)(!)|\b(bukan|dan|atau)\b
+      scope: keyword.operator.logical.ina
+
+    - match: "="
+      scope: keyword.operator.assignment.ina
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double.ina
+    - match: '\\.'
+      scope: constant.character.escape.ina
+    - match: '(?={{sql_indicator}})'
+      set:
+        - match: '"'
+          scope: punctuation.definition.string.end.ina
+          pop: true
+        - match: ''
+          with_prototype:
+            - match: '(?=")'
+              pop: true
+            - include: interpolation
+          push: 'scope:source.sql'
+    - match: '"'
+      scope: punctuation.definition.string.end.ina
+      pop: true
+
+  function_call_arguments:
+    - match: \(
+      scope: punctuation.section.parameters.begin.ina
+      set:
+        - meta_scope: meta.function-call.parameters.ina
+        - match : \)
+          scope: punctuation.section.parameters.end.ina
+          pop: true
+        - match : ([a-zA-Z0-9_]*?)
+          scope: variable.parameter.ina
+        - match : ','
+          scope: punctuation.separator.parameters.ina
+
+  line_comment:
+    - meta_scope: comment.line.ina
+    - match: $
+      pop: true
